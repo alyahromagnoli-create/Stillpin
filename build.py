@@ -1,4 +1,4 @@
-"""Build a directory-style portable Windows bundle with project-local caches."""
+"""Build a single-file portable Windows bundle with project-local caches."""
 from pathlib import Path
 import os
 import shutil
@@ -15,7 +15,7 @@ os.environ['PYINSTALLER_CONFIG_DIR'] = str(work / 'pyinstaller-cache')
 import PyInstaller.__main__
 
 PyInstaller.__main__.run([
-    '--noconfirm', '--windowed', '--onedir', '--name', 'Stillpin',
+    '--noconfirm', '--windowed', '--onefile', '--name', 'Stillpin',
     '--icon', str(ROOT / 'assets' / 'Stillpin.ico'),
     '--add-data', str(ROOT / 'assets') + os.pathsep + 'assets',
     '--distpath', str(ROOT / 'dist'), '--workpath', str(work / 'build'),
@@ -25,8 +25,3 @@ PyInstaller.__main__.run([
     '--exclude-module', 'PyQt5', '--exclude-module', 'PySide6',
     str(ROOT / 'src' / 'app.py'),
 ])
-dest = ROOT / 'dist' / 'Stillpin'
-shutil.copytree(ROOT / 'licenses', dest / 'licenses', dirs_exist_ok=True)
-for name in ('LICENSE', 'THIRD_PARTY.md'):
-    shutil.copy2(ROOT / name, dest / name)
-shutil.copy2(ROOT / 'docs' / 'USER_GUIDE.md', dest / 'USER_GUIDE.md')

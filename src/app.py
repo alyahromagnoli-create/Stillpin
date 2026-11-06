@@ -248,7 +248,7 @@ class Capture:
         self.app.restore_windows()
 
 class App:
-    def __init__(self, root, data):
+    def __init__(self, root, data,enable_hotkeys=True):
         self.root, self.library = root, Library(data)
         self.pins, self.capture = [], None
         root.title('Stillpin · 截图贴图板')
@@ -310,7 +310,7 @@ class App:
         self.list_frame.pack(fill='both', expand=True, padx=28, pady=(0, 16))
         root.bind('<Control-v>', lambda e: self.paste())
         root.update_idletasks()
-        self.bridge = Bridge(root, self.import_paths, self.screenshot)
+        self.bridge = Bridge(root, self.import_paths, self.screenshot,register_hotkeys=enable_hotkeys)
         if self.bridge.hotkey:
             self.hint.set(self.bridge.hotkey_label + ' 截图 · Ctrl+V 粘贴 · 可拖入文件')
         else:
@@ -433,15 +433,26 @@ class App:
         self.root.destroy()
 
 def main():
+    import argparse
+    parser=argparse.ArgumentParser();parser.add_argument('--data',type=Path);parser.add_argument('--smoke-test',type=Path,help=argparse.SUPPRESS);parser.add_argument('files',nargs='*');args=parser.parse_args()
     dpi_aware()
     base = Path(sys.executable).parent if getattr(sys, 'frozen', False) else Path(__file__).resolve().parents[1]
-    data = base / 'data'
-    if '--data' in sys.argv:
-        data = Path(sys.argv[sys.argv.index('--data') + 1])
+    data = args.data or base / 'data'
     root = tk.Tk()
-    app = App(root, data)
-    for path in sys.argv[1:] if '--data' not in sys.argv else []:
+    app = App(root, data,enable_hotkeys=not bool(args.smoke_test))
+    for path in args.files:
         app.import_paths([path])
+    if args.smoke_test:
+        import json,fitz
+        def smoke():
+            before=len(app.pins)
+            if not app.pins:
+                app.add(app.library.import_image(Image.new('RGB',(123,77),'#b64b4b'),'portable synthetic image'))
+                pdf=data/'portable-sample.pdf';doc=fitz.open();doc.new_page(width=200,height=100);doc.save(pdf);doc.close();app.add(app.library.import_file(pdf));pdf.unlink()
+            app.save();root.update()
+            report={'data':str(data),'restored_before':before,'pins':len(app.pins),'image_size':list(app.library.page(app.pins[0].item).size),'runtime':str(getattr(sys,'_MEIPASS','')),'global_hotkeys':app.bridge.hotkey}
+            args.smoke_test.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8');app.quit()
+        root.after(500,smoke)
     root.mainloop()
 
 if __name__ == '__main__':

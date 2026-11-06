@@ -9,7 +9,7 @@ def dpi_aware():
         C.windll.user32.SetProcessDPIAware()
 
 class Bridge:
-    def __init__(self, widget, on_files, on_capture):
+    def __init__(self, widget, on_files, on_capture,register_hotkeys=True):
         self.widget = widget
         self.user = C.windll.user32
         self.shell = C.windll.shell32
@@ -51,7 +51,8 @@ class Bridge:
         self.shell.DragAcceptFiles(self.hwnd, True)
         self.hotkey = False
         self.hotkey_label = ''
-        for modifiers, key, label in ((6, ord('A'), 'Ctrl+Alt+A'), (7, ord('A'), 'Ctrl+Alt+Shift+A'), (6, 0x71, 'Ctrl+Alt+F2')):
+        choices=((6, ord('A'), 'Ctrl+Alt+A'), (7, ord('A'), 'Ctrl+Alt+Shift+A'), (6, 0x71, 'Ctrl+Alt+F2')) if register_hotkeys else ()
+        for modifiers, key, label in choices:
             if self.user.RegisterHotKey(self.hwnd, 0xB041, 0x4000 | modifiers, key):
                 self.hotkey = True
                 self.hotkey_label = label

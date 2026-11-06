@@ -1,75 +1,44 @@
-<img src="assets/Stillpin.png" width="88" alt="Stillpin icon">
-
 # Stillpin
 
-**让参考固定在眼前。** A portable reference pinboard for Windows.
+截图与参考图悬浮贴图板。Windows 单 EXE 便携版，Tkinter + Pillow + PyMuPDF，会话使用 JSON。
 
-截图、粘贴参考图，或打开 PDF 和文本，以独立置顶窗口悬浮在代码编辑器、绘图软件和 PowerPoint 上方。冷白底、黑灰排版、少量朱红强调。
+**[下载最新版 Windows EXE](https://github.com/alyahromagnoli-create/Stillpin/releases/latest)** · [详细使用说明](docs/USER_GUIDE.zh-CN.md)
 
-[下载 Windows 便携版](https://github.com/alyahromagnoli-create/Stillpin/releases/latest) · [使用说明](docs/USER_GUIDE.md)
-
-## 下载运行
-
-在 Release 中下载 **Stillpin_Windows_x64_v1.0.0.zip**，完整解压，然后双击 `Stillpin.exe`。无需安装 Python。
-
-请保留整个文件夹及 `_internal`。运行目录需要可写权限；首次使用后会生成 `data`，保存导入素材副本和会话。移动到其他位置时一起带走即可。
+当前版本：**1.1.0**。无需安装 Python 或开发库，不要求电脑存在 D 盘。
 
 ## 功能
 
-- 区域截图，框选完成即生成贴图；Esc 取消。
-- Ctrl+V 粘贴截图或文件，支持从资源管理器拖文件到主面板。
-- 多个独立参考窗口：置顶、透明度、滚轮缩放、拖动平移。
-- PDF 逐页预览，纯文本与代码可滚动查看、选择复制。
-- 导入时保留本地副本，不修改原文件；自动恢复上次参考窗口、位置和 PDF 页码。
-- 当前图片或 PDF 页面可以另存为 PNG。
+- 区域截图、剪贴板图片、文件拖入与独立置顶贴图窗。
+- 图片缩放/平移、透明度、PDF 翻页与文本预览。
+- 导入素材保存副本，会话采用相对路径，随 data 一起移动。
+- 新版为单 EXE，运行无需旧版 _internal 文件夹。
 
-| 管理面板 | 独立贴图窗 |
-| --- | --- |
-| ![管理面板](docs/manager.png) | ![贴图窗](docs/pin.png) |
+## 使用与数据
 
-截图中使用的是合成参考图和演示文本。
+下载 Release 中的 `Stillpin.exe`，放在可写文件夹后双击。首次解包需要几秒，解包使用 Windows 系统临时目录，程序退出后由运行时清理。
 
-## 快捷键
+全新使用只需 EXE。保留已有记录时，先退出旧版，再把 EXE 和旁边的 **data** 文件夹一起移动或备份。持续修改的数据独立存储，不能永久写回 EXE。本仓库和下载包不包含真实个人记录。
 
-| 操作 | 按键 |
-| --- | --- |
-| 全局区域截图 | 优先 Ctrl+Alt+A；冲突时自动尝试备用组合，以面板显示为准 |
-| 粘贴图片或文件 | 在主面板或贴图窗按 Ctrl+V |
-| 缩放 / 平移 | 滚轮 / 拖动图片 |
-| 适应窗口 | 双击图片 |
-| PDF 翻页 | 左右箭头 |
-| 找回管理面板 | 在贴图窗按 Esc |
-| 另存当前预览 | Ctrl+S |
+Word、PPT 等材料请截图后粘贴，不做原生 Office 渲染；GIF 为首帧，加密 PDF 不支持。
 
-## 支持范围
+## 验证范围
 
-图片：PNG、JPEG、BMP、WebP、GIF、TIFF、ICO。GIF 仅首帧。PDF 支持翻页，暂不支持加密 PDF。文本支持 TXT、Markdown、常见代码、CSV、JSON 等，单个文本最大 4 MB。
+6 项项目测试通过；独立 EXE 在清理 Python 环境变量、限制 PATH、中文空格路径和不同工作目录下运行，并验证程序连同 data 复制到新位置后的重启与记录恢复。发布 EXE 与对应 Python 核心源码已核对。
 
-Word、PPT 请打开后截图贴入；程序不直接渲染 Office 文件。PDF 页面为受分辨率上限约束的预览。部分受保护的窗口不允许系统截图。
+目前仅在本机 Windows 11 x64 验证；尚未在第二台实体电脑、Windows 10 或其他架构实机验证。程序未签名。
 
-## 从源码运行
+## 从源码构建
 
-Windows x64，Python 3.12，需包含 Tcl/Tk。
+Windows x64 + Python 3.12：
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --cache-dir work\pip-cache -r requirements.txt
-.\.venv\Scripts\python.exe src\app.py
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\build-portable.ps1
 ```
 
-```powershell
-.\.venv\Scripts\python.exe -m pytest tests -q
-.\.venv\Scripts\python.exe build.py
-```
-
-`build.py` 将打包缓存和临时文件定位在本项目的 `work` 中，生成目录式便携包 `dist/Stillpin`，不使用单文件自解压模式。
-
-## 隐私与验证
-
-参考内容在本机处理，应用不上传截图或文件；不需要账号。`data/assets` 存放副本，移除窗口不会自动删除历史素材。
-
-发布前完成 6 项单元测试、7 组本地 GUI 检查，以及中文空格目录中的独立 EXE 启动、会话恢复和 Win32 置顶检查。仅在一台 Windows 11 x64 电脑验证；尚未在第二台实体电脑或混合 DPI 多显示器环境实测。
+构建缓存和中间文件放在项目内的 work，输出路径见构建脚本。EXE 仅作为 Release 附件发布。
 
 ## 许可
 
-本项目按 **GNU AGPL v3.0** 发布，见 [LICENSE](LICENSE)。PDF 预览依赖 PyMuPDF，其采用 [AGPL / 商业双许可](https://pymupdf.io/licensing)。第三方组件的许可和来源见 [THIRD_PARTY.md](THIRD_PARTY.md)。
+原始应用与图标：**AGPL-3.0**，见 [LICENSE](LICENSE)。第三方组件保留各自许可，相关原文随源码或便携包附带。
